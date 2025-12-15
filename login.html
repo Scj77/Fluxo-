@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Sistema Espartano</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-left">
+            <div class="brand-section">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>ESPARTANO</h1>
+                </div>
+                <p class="slogan">Força. Honra. Lealdade.</p>
+                
+                <div class="credentials-info">
+                    <h3><i class="fas fa-key"></i>Projeto em desenvolvimento</h3>
+                    <div class="credential-item">
+                        <strong>Desenvolvedor:</strong> admin
+                    </div>
+                    <div class="credential-item">
+                        <strong>Cadastro:</strong> cadastro 
+                    </div>
+                    <div class="credential-item">
+                        <strong>Conciliação:</strong> conciliacao
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="login-box">
+            <button title="Alternar Tema" onclick="alternarTema()" id="themeToggle" class="theme-toggle-login">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+            <div class="login-header">
+                <h2>Acesso ao Sistema</h2>
+                <p>Digite suas credenciais para continuar</p>
+            </div>
+
+            <div id="login-error" class="error-message" style="display:none;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Usuário ou senha incorretos!</span>
+            </div>
+
+            <form id="login-form" onsubmit="login(event)">
+                <div class="input-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i> Usuário
+                    </label>
+                    <input type="text" id="username" placeholder="Digite seu usuário" autocomplete="username">
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Senha
+                    </label>
+                    <div class="password-container">
+                        <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password">
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="options">
+                    <div class="role-badges">
+                        <span class="badge badge-admin">Caso aconteça de esquecer a senha fale com um dos Dev.</span>
+                        <br>
+                        <br>
+                        <span class="badge badge-cadastro">*Lembre-se de salvar os dados preenchidos.</span>
+                        <span class="badge badge-conciliacao"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <span>Entrar no Sistema</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+
+                <div class="security-info">
+                    <i class="fas fa-shield"></i>
+                    <span>Sistema seguro com autenticação local</span>
+                </div>
+            </form>
+
+            <div class="footer">
+                <p class="version">Projeto em desenvolvimento por Silvio e Aislan</p>
+                <p class="copyright">© 2025 - Todos os direitos reservados</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+    <script src="theme.js"></script>
+    <script>
+        // Adicionando a função togglePassword aqui para evitar erros
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.querySelector('.toggle-password i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.classList.remove('fa-eye');
+                toggleButton.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleButton.classList.remove('fa-eye-slash');
+                toggleButton.classList.add('fa-eye');
+            }
+        }
+
+        // Foco automático no campo de usuário
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('username').focus();
+            
+            // Pressionar Enter para enviar
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const form = document.getElementById('login-form');
+                    const event = new Event('submit', { cancelable: true });
+                    form.dispatchEvent(event);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

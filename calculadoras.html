@@ -1,0 +1,115 @@
+<!DOCTYPE html> 
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadoras • ESPARTANO</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+<div class="wrap">
+
+<header class="app-header">
+  <div class="title">
+    <div class="logo">ES</div>
+    <div>
+      <h1>Calculadoras ESPARTANO</h1>
+      <div class="subtitle">Ferramentas de Multa e Dobras</div>
+    </div>
+  </div>
+
+  <div class="header-actions">
+	    <button title="Alternar Tema" onclick="alternarTema()" id="themeToggle">
+	      <i class="fa-solid fa-sun"></i>
+	    </button>
+    <button onclick="window.location.href='index.html'">
+      <i class="fa-solid fa-house"></i> Voltar
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ======================== CALCULADORA DE MULTAS ======================== -->
+<section class="panel main-panel">
+  <h2><i class="fa-solid fa-calculator"></i> Calculadora de Multas</h2>
+
+  <textarea id="entradaMulta" placeholder="Cole aqui os dados com ❌ e valores de qualquer tipo (ex: 50 / 70$ / 130,40 / 240.75)" style="height:140px"></textarea>
+
+  <button class="btn btn-add" onclick="calcularMulta()">Calcular Multa</button>
+
+  <h3 style="margin-top:10px;">Total Multas:</h3>
+  <div class="card" id="resultadoMulta">R$ 0,00</div>
+</section>
+
+
+
+<!-- ======================== CALCULADORA DOBRAS ======================== -->
+<section class="panel main-panel">
+  <h2><i class="fa-solid fa-money-bill-wave"></i> Calculadora Dobras / Pagamento</h2>
+
+  <input type="number" id="valorDiaria2" class="input" placeholder="Valor da diária (ex: 105)">
+  <textarea id="entradaDobras" placeholder="Cole os dados com ✅ e 🟩" style="height:140px"></textarea>
+
+  <button class="btn btn-success" onclick="calcularDobras()">Calcular</button>
+
+  <h3>Total:</h3>
+  <div class="card" id="resultadoDobras">R$ 0,00</div>
+</section>
+
+</main>
+</div>
+
+<script src="theme.js"></script>
+<script>
+/* ============================================================
+   CALCULADORA DE MULTAS — CORRIGIDA
+   Agora ela captura valores mesmo com textos / símbolos no meio
+   Ex: ❌ 50 / ❌ valor: 130,40 / ❌ total = 240.75
+   ============================================================ */
+function calcularMulta() {
+  const texto = document.getElementById("entradaMulta").value;
+
+  const regex = /❌[^0-9]*([\d.,]+)/g;
+
+  let match;
+  let total = 0;
+
+  while ((match = regex.exec(texto)) !== null) {
+    const numero = match[1].replace(",", ".");
+    total += parseFloat(numero);
+  }
+
+  document.getElementById("resultadoMulta").textContent =
+    total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+function calcularDobras() {
+  const texto = document.getElementById("entradaDobras").value;
+  const diaria = parseFloat(document.getElementById("valorDiaria2").value) || 0;
+
+  const linhas = texto.split("\n");
+  let total = 0;
+
+  linhas.forEach(linha => {
+    const qtdVerde = (linha.match(/🟩/g) || []).length;
+    const qtdCheck = (linha.match(/✅/g) || []).length;
+
+    if (qtdVerde > 0) {
+      total += 20; // Tem 🟩 → adiciona 20
+    } else if (qtdCheck >= 2) {
+      total += diaria; // Linha com 2 ou mais check marca diária
+    }
+  });
+
+  document.getElementById("resultadoDobras").textContent =
+    total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+</script>
+
+</body>
+</html>

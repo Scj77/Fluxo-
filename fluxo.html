@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Análise de Fluxo Financeiro - ESPARTANO">
+  <title>Análise de Fluxo - ESPARTANO</title>
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  
+  <!-- Chart.js para gráficos -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  
+  <!-- jsPDF e html2canvas para exportação -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <style>
+    .fluxo-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .fluxo-card {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .fluxo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .fluxo-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .fluxo-value {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .fluxo-value.positivo {
+      color: var(--success);
+    }
+
+    .fluxo-value.negativo {
+      color: var(--danger);
+    }
+
+    .fluxo-value.equilibrado {
+      color: var(--info);
+    }
+
+    .fluxo-status {
+      padding: 10px 15px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .fluxo-status.superavit {
+      background-color: rgba(76, 175, 80, 0.2);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .fluxo-status.deficit {
+      background-color: rgba(244, 67, 54, 0.2);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .fluxo-status.equilibrado {
+      background-color: rgba(33, 150, 243, 0.2);
+      color: var(--info);
+      border: 1px solid var(--info);
+    }
+
+    .fluxo-detalhes {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .fluxo-detalhes div {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+    }
+
+    .fluxo-detalhes label {
+      font-weight: 500;
+    }
+
+    .fluxo-detalhes value {
+      font-family: 'Courier New', monospace;
+      color: var(--text);
+    }
+
+    .grafico-container {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .grafico-container h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    #fluxoChart {
+      max-height: 400px;
+    }
+
+    .exportacao-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .btn-export {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-export:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-export.pdf {
+      background: #d32f2f;
+    }
+
+    .btn-export.pdf:hover {
+      background: #b71c1c;
+    }
+
+    .btn-export.jpg {
+      background: #ff9800;
+    }
+
+    .btn-export.jpg:hover {
+      background: #f57c00;
+    }
+
+    .btn-export.excel {
+      background: #4caf50;
+    }
+
+    .btn-export.excel:hover {
+      background: #388e3c;
+    }
+
+    .resumo-total {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .resumo-total h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    .resumo-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.95rem;
+    }
+
+    .resumo-item:last-child {
+      border-bottom: none;
+    }
+
+    .resumo-item label {
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .resumo-item value {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .resumo-item.total {
+      padding: 15px 0;
+      border-top: 2px solid var(--border-color);
+      border-bottom: 2px solid var(--border-color);
+      font-size: 1.05rem;
+    }
+
+    .resumo-item.total label {
+      color: var(--text);
+    }
+
+    .resumo-item.total value {
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+      .fluxo-container {
+        grid-template-columns: 1fr;
+      }
+
+      .exportacao-buttons {
+        flex-direction: column;
+      }
+
+      .btn-export {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+   
+    <header class="app-header">
+      <div class="title">
+        <div class="logo">ES</div>
+        <div>
+          <h1>Análise de Fluxo ESPARTANO</h1>
+          <div class="subtitle">Visualização de Fluxo Financeiro</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button title="Voltar para Conciliação" onclick="window.location.href='index.html'">
+          <i class="fa-solid fa-arrow-left"></i> Voltar
+        </button>
+        <button title="Alternar Tema" onclick="alternarTema()" id="themeToggle">
+          <i class="fa-solid fa-sun"></i>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Seção de Cálculo de Fluxo -->
+      <div class="fluxo-container">
+        <!-- Card de Cálculo -->
+        <div class="fluxo-card">
+          <div class="fluxo-header">
+            <h3><i class="fa-solid fa-calculator"></i> Cálculo do Fluxo</h3>
+          </div>
+          
+          <div class="fluxo-detalhes">
+            <div>
+              <label>Saldo Inicial (SI):</label>
+              <value id="calcSaldoInicial">R$ 0,00</value>
+            </div>
+            <div>
+              <label>Saldo Final (SF):</label>
+              <value id="calcSaldoFinal">R$ 0,00</value>
+            </div>
+            <div style="border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px;">
+              <label>Diferença (SI - SF):</label>
+              <value id="calcDiferenca">R$ 0,00</value>
+            </div>
+            <div>
+              <label>Renovações:</label>
+              <value id="calcRenovacoes">R$ 0,00</value>
+            </div>
+            <div>
+              <label>Novos Clientes:</label>
+              <value id="calcNovos">R$ 0,00</value>
+            </div>
+            <div>
+              <label>Entradas Diversas:</label>
+              <value id="calcEntradas">R$ 0,00</value>
+            </div>
+            <div>
+              <label>Saídas Diversas:</label>
+              <value id="calcSaidas">R$ 0,00</value>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card de Resultado -->
+        <div class="fluxo-card">
+          <div class="fluxo-header">
+            <h3><i class="fa-solid fa-chart-line"></i> Resultado</h3>
+          </div>
+          
+          <div style="text-align: center;">
+            <div style="font-size: 0.9rem; color: var(--muted); margin-bottom: 10px;">
+              Fluxo = Diferença - Renovações - Novos Clientes + Entradas Diversas - Saídas Diversas
+            </div>
+            
+            <div class="fluxo-value" id="fluxoValor">R$ 0,00</div>
+            
+            <div class="fluxo-status" id="fluxoStatus">
+              EQUILIBRADO
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.1); border-radius: 6px;">
+              <div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 8px;">Interpretação:</div>
+              <div id="fluxoInterpretacao" style="font-size: 1rem; font-weight: 600; color: var(--text);">
+                Fluxo equilibrado
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico em Pizza -->
+      <div class="grafico-container">
+        <h3><i class="fa-solid fa-chart-pie"></i> Visualização Gráfica</h3>
+        <div style="position: relative; height: 400px;">
+          <canvas id="fluxoChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Botões de Exportação -->
+      <div class="exportacao-buttons">
+        <button class="btn-export pdf" onclick="exportarPDF()">
+          <i class="fa-solid fa-file-pdf"></i> Exportar PDF
+        </button>
+        <button class="btn-export jpg" onclick="exportarJPG()">
+          <i class="fa-solid fa-image"></i> Exportar JPG
+        </button>
+        <button class="btn-export excel" onclick="exportarExcel()">
+          <i class="fa-solid fa-file-excel"></i> Exportar Excel
+        </button>
+      </div>
+
+      <!-- Resumo Total -->
+      <div class="resumo-total">
+        <h3><i class="fa-solid fa-list"></i> Resumo Total</h3>
+        
+        <div class="resumo-item">
+          <label>Saldo Inicial:</label>
+          <value id="resSaldoInicial">R$ 0,00</value>
+        </div>
+
+        <div class="resumo-item">
+          <label>Renovações:</label>
+          <value id="resRenovacoes">R$ 0,00</value>
+        </div>
+
+        <div class="resumo-item">
+          <label>Novos Clientes:</label>
+          <value id="resNovos">R$ 0,00</value>
+        </div>
+
+        <div class="resumo-item">
+          <label>Entradas Diversas:</label>
+          <value id="resEntradas">R$ 0,00</value>
+        </div>
+
+        <div class="resumo-item">
+          <label>Saídas Diversas:</label>
+          <value id="resSaidas">R$ 0,00</value>
+        </div>
+
+        <div class="resumo-item">
+          <label>Saldo Final:</label>
+          <value id="resSaldoFinal">R$ 0,00</value>
+        </div>
+
+        <div class="resumo-item total">
+          <label>Fluxo Total:</label>
+          <value id="resFluxoTotal">R$ 0,00</value>
+        </div>
+
+        <div style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 6px; text-align: center;">
+          <div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 5px;">Status:</div>
+          <div id="resStatus" style="font-size: 1rem; font-weight: 600;">
+            Nenhum dado carregado
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="theme.js"></script>
+  <script src="fluxo-script.js"></script>
+</body>
+</html>

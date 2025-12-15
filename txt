@@ -1,0 +1,145 @@
+root@kali:~# medusa -h
+Medusa v2.3 [http://www.foofus.net] (C) JoMo-Kun / Foofus Networks <jmk@foofus.net>
+
+
+Syntax: Medusa [-h host|-H file] [-u username|-U file] [-p password|-P file] [-C file] -M module [OPT]
+  -h [TEXT]    : Target hostname or IP address
+  -H [FILE]    : File containing target hostnames or IP addresses
+  -u [TEXT]    : Username to test
+  -U [FILE]    : File containing usernames to test
+  -p [TEXT]    : Password to test
+  -P [FILE]    : File containing passwords to test
+  -C [FILE]    : File containing combo entries. See README for more information.
+  -O [FILE]    : File to append log information to
+  -e [n/s/ns]  : Additional password checks ([n] No Password, [s] Password = Username)
+  -M [TEXT]    : Name of the module to execute (without the .mod extension)
+  -m [TEXT]    : Parameter to pass to the module. This can be passed multiple times with a
+                 different parameter each time and they will all be sent to the module (i.e.
+                 -m Param1 -m Param2, etc.)
+  -d           : Dump all known modules
+  -n [NUM]     : Use for non-default TCP port number
+  -s           : Enable SSL
+  -g [NUM]     : Give up after trying to connect for NUM seconds (default 3)
+  -r [NUM]     : Sleep NUM seconds between retry attempts (default 3)
+  -R [NUM]     : Attempt NUM retries before giving up. The total number of attempts will be NUM + 1.
+  -c [NUM]     : Time to wait in usec to verify socket is available (default 500 usec).
+  -t [NUM]     : Total number of logins to be tested concurrently
+  -T [NUM]     : Total number of hosts to be tested concurrently
+  -L           : Parallelize logins using one username per thread. The default is to process 
+                 the entire username before proceeding.
+  -f           : Stop scanning host after first valid username/password found.
+  -F           : Stop audit after first valid username/password found on any host.
+  -b           : Suppress startup banner
+  -q           : Display module's usage information
+  -v [NUM]     : Verbose level [0 - 6 (more)]
+  -w [NUM]     : Error debug level [0 - 10 (more)]
+  -V           : Display version
+  -Z [TEXT]    : Resume scan based on map of previous scan
+
+<!DOCTYPE html> 
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadoras • ESPARTANO</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+<div class="wrap">
+
+<header class="app-header">
+  <div class="title">
+    <div class="logo">ES</div>
+    <div>
+      <h1>Calculadoras ESPARTANO</h1>
+      <div class="subtitle">Ferramentas de Multa e Dobras</div>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <button onclick="window.location.href='index.html'">
+      <i class="fa-solid fa-house"></i> Voltar
+    </button>
+  </div>
+</header>
+
+<main>
+<section class="panel main-panel">
+  <h2><i class="fa-solid fa-calculator"></i> Calculadora de Multas</h2>
+
+  <textarea id="entradaMulta" placeholder="Cole aqui os dados com ❌ e valores de qualquer tipo (ex: 50 / 70$ / 130,40 / 240.75)" style="height:140px"></textarea>
+
+  <button class="btn btn-add" onclick="calcularMulta()">Calcular Multa</button>
+
+  <h3 style="margin-top:10px;">Total Multas:</h3>
+  <div class="card" id="resultadoMulta">R$ 0,00</div>
+</section>
+
+<section class="panel main-panel">
+  <h2><i class="fa-solid fa-money-bill-wave"></i> Calculadora Dobras / Pagamento</h2>
+
+  <input type="number" id="valorDiaria2" class="input" placeholder="Valor da diária (ex: 105)">
+  <textarea id="entradaDobras" placeholder="Cole os dados com ✅ e 🟩" style="height:140px"></textarea>
+
+  <button class="btn btn-success" onclick="calcularDobras()">Calcular</button>
+
+  <h3>Total:</h3>
+  <div class="card" id="resultadoDobras">R$ 0,00</div>
+</section>
+</main>
+</div>
+
+<script>
+// ------------- CALCULADORA DE MULTAS -------------
+function calcularMulta() {
+  const texto = document.getElementById("entradaMulta").value;
+
+  // Captura apenas valores que aparecem imediatamente depois de ❌
+  const regex = /❌+ *(\d+[.,]?\d*)/g;
+  let match;
+  let total = 0;
+
+  while ((match = regex.exec(texto)) !== null) {
+    const numero = match[1].replace(",", ".");
+    total += parseFloat(numero);
+  }
+
+  document.getElementById("resultadoMulta").textContent =
+    total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+
+// ------------- CALCULADORA DOBRAS / PAGAMENTO -------------
+function calcularDobras() {
+  const texto = document.getElementById("entradaDobras").value;
+  const diaria = parseFloat(document.getElementById("valorDiaria2").value) || 0;
+
+  const linhas = texto.split("\n");
+  let total = 0;
+
+  linhas.forEach(linha => {
+    const qtdVerde = (linha.match(/🟩/g) || []).length;
+    const qtdCheck = (linha.match(/✅/g) || []).length;
+
+    if (qtdVerde > 0) {
+      total += 20;                
+    } else if (qtdCheck >= 2) {
+      total += diaria;            
+    } else {
+    }
+  });
+
+  document.getElementById("resultadoDobras").textContent =
+    total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+// Chamada de permissão
+checkPermission(['conciliacao', 'admin']);
+</script>
+
+
+</script>
+
+</body>
+</html>
