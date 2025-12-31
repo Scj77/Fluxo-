@@ -15,11 +15,27 @@ function gerarTabelaDiaria() {
     }
 
     const dataInicial = new Date(dataInicialInput.value + 'T00:00:00');
-    const valorDiaria = valorDiariaInput.value.trim() || '---';
+    const rawValor = valorDiariaInput.value || '';
+    const valorDiaria = rawValor.trim() || '---';
+    // Status: se o campo estiver vazio => NEUTRO, senão POSITIVO (>) ou NEGATIVO (<=)
+    let statusGlobal, statusClass;
+    if (rawValor.trim() === '') {
+        statusGlobal = 'NEUTRO';
+        statusClass = 'neutro';
+    } else {
+        const valorDiariaNum = parseFloat(String(rawValor).replace(',', '.')) || 0;
+        if (valorDiariaNum > 0) {
+            statusGlobal = 'POSITIVO';
+            statusClass = 'positivo';
+        } else {
+            statusGlobal = 'NEGATIVO';
+            statusClass = 'negativo';
+        }
+    }
 
     let tabelaHTML = `
         <div class="diaria-header">
-            <p>*Valor Diária* *R$${valorDiaria}*</p>
+            <p>*Valor Diária* *R$${valorDiaria}* <span class="diaria-status ${statusClass}">${statusGlobal}</span></p>
         </div>
         <ol class="diaria-list">
     `;
@@ -27,7 +43,8 @@ function gerarTabelaDiaria() {
     let dataAtual = new Date(dataInicial);
     
     for (let i = 0; i < 20; i++) {
-        tabelaHTML += `<li>${formatarDataDiaria(dataAtual)}</li>`;
+        const diaStr = formatarDataDiaria(dataAtual);
+        tabelaHTML += `<li><span class="diaria-date">${diaStr}</span> <span class="diaria-status ${statusClass}">${statusGlobal}</span></li>`;
         dataAtual.setDate(dataAtual.getDate() + 1);
     }
 
@@ -42,12 +59,21 @@ function copiarTabelaDiaria() {
         return;
     }
 
-    const valorDiaria = document.getElementById('valorDiaria').value.trim() || '---';
-    let textoCopia = `*Valor Diária* *R$${valorDiaria}*\n\n`;
+    const rawValorCopy = document.getElementById('valorDiaria').value || '';
+    const valorDiaria = rawValorCopy.trim() || '---';
+    let statusGlobalCopy;
+    if (rawValorCopy.trim() === '') {
+        statusGlobalCopy = 'NEUTRO';
+    } else {
+        const valorDiariaNum = parseFloat(String(rawValorCopy).replace(',', '.')) || 0;
+        statusGlobalCopy = valorDiariaNum > 0 ? 'POSITIVO' : 'NEGATIVO';
+    }
+    let textoCopia = `*Valor Diária* *R$${valorDiaria}* - ${statusGlobalCopy}\n\n`;
     
     const lista = resultadoDiv.querySelector('.diaria-list');
     if (lista) {
         Array.from(lista.children).forEach((li, index) => {
+            // Incluir o texto do item (data e status)
             textoCopia += `${index + 1}. ${li.textContent}\n`;
         });
     }

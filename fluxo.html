@@ -11,6 +11,8 @@
   
   <!-- Chart.js para gráficos -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <!-- Plugin de DataLabels para Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   
   <!-- jsPDF e html2canvas para exportação -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -22,9 +24,12 @@
   <style>
     .fluxo-container {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
       gap: 20px;
-      margin-bottom: 30px;
+      margin: 0 auto 30px auto;
+      max-width: 960px;
+      justify-items: center;
+      align-items: start;
     }
 
     .fluxo-card {
@@ -120,7 +125,9 @@
       border: 2px solid var(--border-color);
       border-radius: 8px;
       padding: 20px;
-      margin-bottom: 30px;
+      margin: 20px auto 30px auto;
+      max-width: 560px;
+      width: 100%;
     }
 
     .grafico-container h3 {
@@ -129,14 +136,19 @@
     }
 
     #fluxoChart {
-      max-height: 400px;
+      max-height: 280px;
+      width: 100% !important;
+      display: block;
+      margin: 0 auto;
     }
 
     .exportacao-buttons {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 30px;
+      margin: 10px auto 30px auto;
+      justify-content: center;
+      max-width: 560px;
     }
 
     .btn-export {
@@ -233,6 +245,8 @@
       font-size: 1.2rem;
     }
 
+    /* (revertido) */
+
     @media (max-width: 768px) {
       .fluxo-container {
         grid-template-columns: 1fr;
@@ -258,6 +272,7 @@
         <div>
           <h1>Análise de Fluxo ESPARTANO</h1>
           <div class="subtitle">Visualização de Fluxo Financeiro</div>
+          <div style="margin-top:6px"><div id="pageStatus" style="font-size:0.9rem;color:var(--muted)">Status: aguardando dados...</div></div>
         </div>
       </div>
 
@@ -272,6 +287,7 @@
     </header>
 
     <main>
+      <!-- (Colar Totais movido para o rodapé) -->
       <!-- Seção de Cálculo de Fluxo -->
       <div class="fluxo-container">
         <!-- Card de Cálculo -->
@@ -345,6 +361,23 @@
         <div style="position: relative; height: 400px;">
           <canvas id="fluxoChart"></canvas>
         </div>
+        <div style="text-align:center; color:var(--muted); font-size:0.9rem; margin-top:8px;">
+          <div style="margin-bottom:6px;">Clique em uma fatia para ver detalhes.</div>
+          <div>Use a <strong>roda do mouse</strong> para dar zoom; dê <strong>duplo clique</strong> ou use o botão abaixo para resetar.</div>
+        </div>
+        <div style="text-align:center; margin-top:8px;">
+          <button id="resetZoomBtn" class="btn" style="padding:6px 10px; font-size:0.9rem;">Resetar Zoom</button>
+        </div>
+        <div style="text-align:center; margin-top:8px;">
+          <button id="ledToggleBtn" class="btn" style="padding:6px 10px; font-size:0.9rem;">Pausar LEDs</button>
+        </div>
+        <div id="sliceDetails" class="slice-details" style="display:none; margin-top:12px; max-width:560px; margin-left:auto; margin-right:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong id="sliceLabel">Detalhes</strong>
+            <button class="btn" onclick="hideSliceDetails()">Fechar</button>
+          </div>
+          <div id="sliceContent" style="margin-top:8px; color:var(--muted);"></div>
+        </div>
       </div>
 
       <!-- Botões de Exportação -->
@@ -413,5 +446,24 @@
   <!-- Scripts -->
   <script src="theme.js"></script>
   <script src="fluxo-script.js"></script>
+  <footer class="footer">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button class="btn btn-paste" onclick="togglePasteAreaFluxo()">
+        <i class="fa-solid fa-paste"></i> Colar Totais em Lote (Fluxo)
+      </button>
+      <div id="pasteFluxoFeedbackFooter" style="color:var(--muted); font-size:0.9rem;"></div>
+    </div>
+
+    <div id="pasteArea-fluxo" class="paste-container" style="display:none; width:100%; max-width:740px;">
+      <label>Cole aqui os totais (cada linha: NOME: VALOR, ex: SALDO INICIAL: R$ 50000):</label>
+      <textarea id="pasteText-fluxo" placeholder="Cole o bloco com os totais..."></textarea>
+      <div class="paste-actions" style="margin-top:8px;">
+        <button class="btn" onclick="togglePasteAreaFluxo()">Cancelar</button>
+        <button class="btn btn-add" onclick="aplicarTotaisColadosFluxo()">Aplicar</button>
+      </div>
+      <div id="pasteFluxoFeedback" style="margin-top:8px; color:var(--muted); font-size:0.9rem;"></div>
+    </div>
+  </footer>
+  <!-- (drilldown modal removido) -->
 </body>
 </html>

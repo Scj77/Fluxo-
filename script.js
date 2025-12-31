@@ -236,7 +236,9 @@ function atualizarResumo() {
   document.getElementById('status').textContent = `Atualizado em ${new Date().toLocaleString('pt-BR')}`;
 
   atualizarGrafico(inicial, totRenov, totNovos, totEntradas, totSaidas, final);
+
 }
+// (Funções de colagem de totais removidas conforme solicitação)
 
 function atualizarGrafico(inicial, renovacoes, novos, entradas, saidas, final) {
   document.getElementById('grafSaldoInicial').textContent = formatarMoeda(inicial);
@@ -287,6 +289,8 @@ function gerarConciliacao() {
   const totNovos = calcularTotal(listas.novo.data);
   const totEntradas = calcularTotal(listas.entrada.data);
   const totSaidas = calcularTotal(listas.saida.data);
+
+  // Totais calculados a partir das listas
 
   const saldoCalculado = inicial - totRenov - totNovos + totEntradas - totSaidas;
   let conciliacaoText = '';
